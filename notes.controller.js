@@ -1,55 +1,34 @@
-const fs = require('fs/promises');
-const path = require('path');
-const chalk = require('chalk')
-const notesPath = path.join(__dirname, 'db.json');
+const chalk = require("chalk");
+const Note = require("./models/Note");
 
-
-async function addNote (title) {
-    const notes = await getNotes()
-    const note = {
-        title,
-        id: Date.now().toString()
-    }
-    notes.push(note);
-    await fs.writeFile(notesPath, JSON.stringify(notes))
-
-    console.log(chalk.bgCyan('Notes was added!'))
+async function addNote(title, owner) {
+  await Note.create({ title, owner });
+  console.log(chalk.bgCyan("Notes was added!"));
 }
 
-async function getNotes () {
-    const notes = await fs.readFile(notesPath, {encoding: 'utf-8'})
+async function getNotes() {
+  const notes = await Note.find();
 
-    return Array.isArray(JSON.parse(notes)) ? JSON.parse(notes) : []
+  return notes;
 }
 
-async function printNotes () {
-
-    const notes = await getNotes();
-
-    console.log(chalk.bgCyan('Here is the list of notes:'));
-    notes.forEach(element => {
-        console.log(chalk.cyan(`${element.id}: ${element.title}`))
-    });
-    
+async function removeNotes(id, owner) {
+  const result = await Note.deleteOne({ _id: id, owner});
+   if(result.matchedCount === 0) {
+    throw new Error('No note to delete')
+  }
 }
 
-async function removeNotes(id) {
-    const notes = await getNotes();
-    const newNotes = notes.filter(element => element.id !== id);
-    await fs.writeFile(notesPath, JSON.stringify(newNotes));
-    // console.log(chalk.bgCyan('Note was removed!'))
-    // await printNotes();    
-}
+async function editNotes(id, newNote, owner) {
+  const result = await Note.updateOne({ _id: id, owner }, { title: newNote });
 
-async function editNotes(id, newNote) {
-    const notes = await getNotes();
-    const noteIndex = notes.findIndex(element => element.id === id);
-    if(noteIndex !== -1) {
-        notes[noteIndex].title = newNote;
-         await fs.writeFile(notesPath, JSON.stringify(notes));
-    }
-    
+  if(result.matchedCount === 0) {
+    throw new Error('No note to edit')
+  }
 }
 module.exports = {
-    addNote, getNotes, removeNotes, editNotes
-}
+  addNote,
+  getNotes,
+  removeNotes,
+  editNotes,
+};
