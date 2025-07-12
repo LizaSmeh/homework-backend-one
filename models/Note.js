@@ -1,11 +1,24 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const NoteSchema = mongoose.Schema({
-    title: {
+    creationDate: {
+    type: Date,
+    default: Date.now,
+  },
+    fio: {
+       type: String,
+    required: true,
+    },
+    phone: {
         type: String,
+        validate: {
+            validator: validator.isNumeric,
+            message: 'Invalid phone'
+        }, 
         required: true
     },
-    owner: {
+    problem: {
         type: String,
         required: true
     }

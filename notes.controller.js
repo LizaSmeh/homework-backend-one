@@ -1,8 +1,8 @@
 const chalk = require("chalk");
 const Note = require("./models/Note");
 
-async function addNote(title, owner) {
-  await Note.create({ title, owner });
+async function addNote( fio, phone, problem) {
+  await Note.create({ fio, phone, problem });
   console.log(chalk.bgCyan("Notes was added!"));
 }
 
@@ -12,23 +12,7 @@ async function getNotes() {
   return notes;
 }
 
-async function removeNotes(id, owner) {
-  const result = await Note.deleteOne({ _id: id, owner});
-   if(result.matchedCount === 0) {
-    throw new Error('No note to delete')
-  }
-}
-
-async function editNotes(id, newNote, owner) {
-  const result = await Note.updateOne({ _id: id, owner }, { title: newNote });
-
-  if(result.matchedCount === 0) {
-    throw new Error('No note to edit')
-  }
-}
 module.exports = {
   addNote,
   getNotes,
-  removeNotes,
-  editNotes,
 };
